@@ -17,10 +17,12 @@ public class ConsumedMessageListener implements MessageListener, ExceptionListen
     private static Logger logger = LoggerFactory.getLogger(ConsumedMessageListener.class);
     private DynamoDbClient client;
     private String tableName;
+    private AttributeValue queueSync;
 
     public ConsumedMessageListener(String ddbTableName) {
         client = DynamoDbClient.builder().region(Region.US_EAST_1).build();
         this.tableName = ddbTableName;
+        queueSync = AttributeValue.builder().bool(false).build();
     }
 
     @Override
@@ -34,8 +36,8 @@ public class ConsumedMessageListener implements MessageListener, ExceptionListen
         try {
             ActiveMQMessage amqMessage = (ActiveMQMessage) message;
             ActiveMQTextMessage amqTextMessage = (ActiveMQTextMessage)amqMessage.getDataStructure();
-            logger.info("messageDump " + amqMessage.toString());
-            logger.info("messageDump " + amqTextMessage.toString());
+            logger.debug("messageDump " + amqMessage.toString());
+            logger.debug("messageDump " + amqTextMessage.toString());
             String destName = amqTextMessage.getDestination().getPhysicalName();
             AttributeValue dest = AttributeValue.builder().
                     s(destName).build();
@@ -53,6 +55,7 @@ public class ConsumedMessageListener implements MessageListener, ExceptionListen
             fields.put("brokerId", brokerId);
             fields.put("producerId", producerId);
             fields.put("timestamp", timestamp);
+            fields.put("queueSync", queueSync);
             logger.info("Put field values " + fields.values());
             PutItemRequest request = PutItemRequest.builder()
                     .tableName(this.tableName)
