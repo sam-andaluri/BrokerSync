@@ -35,7 +35,7 @@ public class QueueReader implements Runnable {
             MessageConsumer consumer = session.createConsumer(destination);
             ActiveMQTextMessage message = (ActiveMQTextMessage)consumer.receive(retryTimeout);
             Thread.sleep(2000);
-            while (true) {
+            while (!Thread.currentThread().isInterrupted()) {
                 if (message != null) {
                     String correlationId = message.getJMSCorrelationID();
                     if (mset.memcachedClient.get(correlationId) != null) {
@@ -51,8 +51,16 @@ public class QueueReader implements Runnable {
                 }
                 message = (ActiveMQTextMessage)consumer.receive(retryTimeout);
             }
-        } catch (JMSException | InterruptedException e) {
+        } catch (JMSException e) {
             e.printStackTrace();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } finally {
+            try {
+                session.close();
+            } catch (JMSException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

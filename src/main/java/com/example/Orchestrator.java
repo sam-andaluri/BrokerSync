@@ -4,27 +4,27 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.jms.Connection;
-import javax.jms.Destination;
-import javax.jms.MessageConsumer;
-import javax.jms.Session;
+import javax.jms.*;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class PrimaryProcessor {
-    private static Logger logger = LoggerFactory.getLogger(PrimaryProcessor.class);
-    private Config configuration;
+public class Orchestrator {
+
+    private static Logger logger = LoggerFactory.getLogger(Orchestrator.class);
+    private static Config configuration;
     private ActiveMQConnectionFactory primaryConnectionFactory;
     private ActiveMQConnectionFactory standbyConnectionFactory;
-    private Connection primaryConnection;
-    private Connection standbyConnection;
+    private static Connection primaryConnection;
+    private static Connection standbyConnection;
     private Session primarySession;
     private Session standbySession;
-    ExecutorService executorService;
+    private MessageSet mset = MessageSet.getInstance();
+    private static HashMap<String, ExecutorService> queueThreads = new HashMap<>();
 
 
-    public PrimaryProcessor(Config configuration) {
+    public Orchestrator(Config configuration) {
         this.configuration = configuration;
         primaryConnectionFactory = new ActiveMQConnectionFactory(configuration.getPrimaryBrokerURL());
         primaryConnectionFactory.setUserName(configuration.getPrimaryBrokerUsername());
@@ -33,12 +33,35 @@ public class PrimaryProcessor {
         standbyConnectionFactory = new ActiveMQConnectionFactory(configuration.getStandbyBrokerURL());
         standbyConnectionFactory.setUserName(configuration.getStandbyBrokerUsername());
         standbyConnectionFactory.setPassword(configuration.getStandbyBrokerPassword());
+    }
 
-        executorService = Executors.newFixedThreadPool(configuration.getThreadsPerQueue());
+    public static void startReaders(String queue, int consumerCount) {
+        ExecutorService executorService;
+        int numThreads = configuration.getThreadsPerQueue() * consumerCount;
+        executorService = Executors.newFixedThreadPool(numThreads);
+        queueThreads.put(queue, executorService);
+        for (int i = 0; i < numThreads; i++) {
+            Session standbySession = null;
+            try {
+                standbySession = standbyConnection.createSession(true, Session.SESSION_TRANSACTED);
+            } catch (JMSException e) {
+                e.printStackTrace();
+            }
+            QueueReader qr = new QueueReader(queue + ".DR", standbySession);
+            qr.setRetryTimeout(configuration.getRetryTimeout());
+            executorService.execute(qr);
+        }
+    }
+
+    public static void stopReaders(String queue) {
+        ExecutorService executorService = queueThreads.get(queue);
+        if (executorService != null) {
+
+            executorService.shutdown();
+        }
     }
 
     public void  start() {
-
         logger.info("Starting primary processor...");
         try {
 
@@ -62,14 +85,7 @@ public class PrimaryProcessor {
                 String numConsumersTopic = "ActiveMQ.Advisory.Consumer.Queue." + queue;
                 Destination numConsumersDest = primarySession.createTopic(numConsumersTopic);
                 MessageConsumer numConsumersDestConsumer = primarySession.createConsumer(numConsumersDest);
-                numConsumersDestConsumer.setMessageListener(new ConsumerCountListener());
-
-                for (int i = 0; i < configuration.getThreadsPerQueue(); i++) {
-                    Session standbySession = standbyConnection.createSession(true, Session.SESSION_TRANSACTED);
-                    QueueReader qr = new QueueReader(queue + ".DR", standbySession);
-                    qr.setRetryTimeout(configuration.getRetryTimeout());
-                    executorService.execute(qr);
-                }
+                numConsumersDestConsumer.setMessageListener(new ConsumerCountListener(queue));
             }
         } catch (Exception e) {
             e.printStackTrace();

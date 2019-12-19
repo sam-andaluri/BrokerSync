@@ -16,7 +16,7 @@ public class App
     {
         boolean isPrimary = true;
         String configFileName;
-        PrimaryProcessor primaryProcessor;
+        Orchestrator primaryProcessor;
 
         OptionParser parser = new OptionParser();
         parser.accepts("m", "mode").withRequiredArg().ofType(String.class);
@@ -41,7 +41,7 @@ public class App
         Config config = yaml.loadAs(inputStream, Config.class);
         logger.info("main " + yaml.dump(config));
         if (isPrimary) {
-            primaryProcessor = new PrimaryProcessor(config);
+            primaryProcessor = new Orchestrator(config);
             primaryProcessor.start();
         }
     }

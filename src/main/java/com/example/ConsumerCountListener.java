@@ -10,8 +10,12 @@ import javax.jms.Message;
 import javax.jms.MessageListener;
 
 public class ConsumerCountListener implements MessageListener, ExceptionListener {
-
     private static Logger logger = LoggerFactory.getLogger(ConsumerCountListener.class);
+    private String queueName;
+
+    public ConsumerCountListener(String queueName) {
+        this.queueName = queueName;
+    }
 
     @Override
     public void onMessage(Message message) {
@@ -19,10 +23,15 @@ public class ConsumerCountListener implements MessageListener, ExceptionListener
         ActiveMQMessage amqMessage = (ActiveMQMessage) message;
 
         try {
-            String queueName = message.getJMSDestination().toString();
             int consumerCount = amqMessage.getIntProperty("consumerCount");
-            MessageSet.memcachedClient.set(queueName, 0, consumerCount);
             logger.info("{} consumerCount = {}", queueName, consumerCount);
+            if (consumerCount > 0) {
+                Orchestrator.startReaders(queueName, consumerCount);
+                logger.info("Starting queue readers");
+            } else {
+                Orchestrator.stopReaders(queueName);
+                logger.info("Stopping queue readers");
+            }
         } catch (JMSException e) {
             e.printStackTrace();
         }
