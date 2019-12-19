@@ -17,7 +17,6 @@ public class App
         boolean isPrimary = true;
         String configFileName;
         PrimaryProcessor primaryProcessor;
-        StandbyProcessor standbyProcessor;
 
         OptionParser parser = new OptionParser();
         parser.accepts("m", "mode").withRequiredArg().ofType(String.class);
@@ -44,9 +43,6 @@ public class App
         if (isPrimary) {
             primaryProcessor = new PrimaryProcessor(config);
             primaryProcessor.start();
-        } else {
-            standbyProcessor = new StandbyProcessor(config);
-            standbyProcessor.start();
         }
     }
 }

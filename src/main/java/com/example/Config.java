@@ -4,28 +4,74 @@ import java.util.List;
 
 public class Config {
 
-    private String brokerURL;
-    private String userName;
-    private String password;
-    private String ddbTable;
+    private String primaryBrokerURL;
+    private String primaryBrokerUsername;
+    private String primaryBrokerPassword;
+    private String standbyBrokerURL;
+    private String standbyBrokerUsername;
+    private String standbyBrokerPassword;
     private List<String> drQueues;
     private int threadsPerQueue;
     private int retryTimeout;
 
-    public String getBrokerURL() {
-        return brokerURL;
+    public void setPrimaryBrokerURL(String primaryBrokerURL) {
+        this.primaryBrokerURL = primaryBrokerURL;
     }
 
-    public String getUserName() {
-        return userName;
+    public void setPrimaryBrokerUsername(String primaryBrokerUsername) {
+        this.primaryBrokerUsername = primaryBrokerUsername;
     }
 
-    public String getPassword() {
-        return password;
+    public void setPrimaryBrokerPassword(String primaryBrokerPassword) {
+        this.primaryBrokerPassword = primaryBrokerPassword;
     }
 
-    public String getDdbTable() {
-        return ddbTable;
+    public void setStandbyBrokerURL(String standbyBrokerURL) {
+        this.standbyBrokerURL = standbyBrokerURL;
+    }
+
+    public void setStandbyBrokerUsername(String standbyBrokerUsername) {
+        this.standbyBrokerUsername = standbyBrokerUsername;
+    }
+
+    public void setStandbyBrokerPassword(String standbyBrokerPassword) {
+        this.standbyBrokerPassword = standbyBrokerPassword;
+    }
+
+    public void setDrQueues(List<String> drQueues) {
+        this.drQueues = drQueues;
+    }
+
+    public void setThreadsPerQueue(int threadsPerQueue) {
+        this.threadsPerQueue = threadsPerQueue;
+    }
+
+    public void setRetryTimeout(int retryTimeout) {
+        this.retryTimeout = retryTimeout;
+    }
+
+    public String getPrimaryBrokerURL() {
+        return primaryBrokerURL;
+    }
+
+    public String getPrimaryBrokerUsername() {
+        return primaryBrokerUsername;
+    }
+
+    public String getPrimaryBrokerPassword() {
+        return primaryBrokerPassword;
+    }
+
+    public String getStandbyBrokerURL() {
+        return standbyBrokerURL;
+    }
+
+    public String getStandbyBrokerUsername() {
+        return standbyBrokerUsername;
+    }
+
+    public String getStandbyBrokerPassword() {
+        return standbyBrokerPassword;
     }
 
     public List<String> getDrQueues() {
@@ -40,31 +86,4 @@ public class Config {
         return retryTimeout;
     }
 
-    public void setBrokerURL(String brokerURL) {
-        this.brokerURL = brokerURL;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public void setDdbTable(String ddbTable) {
-        this.ddbTable = ddbTable;
-    }
-
-    public void setDrQueues(List<String> drQueues) {
-        this.drQueues = drQueues;
-    }
-
-    public void setThreadsPerQueue(int threadsPerQueue) {
-        this.threadsPerQueue = threadsPerQueue;
-    }
-
-    public void setRetryTimeout(int retryTimeout) {
-        this.retryTimeout = retryTimeout;
-    }
 }

@@ -1,9 +1,0 @@
-brokerURL : "failover:(ssl://b-a89ccbfc-2c24-45ec-a8c0-1839aa5a94f1-1.mq.us-west-2.amazonaws.com:61617?connectionTimeout=0,ssl://b-a89ccbfc-2c24-45ec-a8c0-1839aa5a94f1-2.mq.us-west-2.amazonaws.com:61617?connectionTimeout=0)"
-userName : "aws"
-password : "mq1234567890"
-ddbTable : "dr-message-sync"
-threadsPerQueue: 5
-retryTimeout: 2000
-drQueues :
-  - TEST.QUEUE.DR
-
