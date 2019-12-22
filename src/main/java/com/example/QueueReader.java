@@ -52,15 +52,9 @@ public class QueueReader implements Runnable {
                 message = (ActiveMQTextMessage)consumer.receive(retryTimeout);
             }
         } catch (JMSException e) {
-            e.printStackTrace();
+            logger.error("JMS Error ", e);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-        } finally {
-            try {
-                session.close();
-            } catch (JMSException e) {
-                e.printStackTrace();
-            }
         }
     }
 }

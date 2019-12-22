@@ -56,13 +56,12 @@ public class Orchestrator {
     public static void stopReaders(String queue) {
         ExecutorService executorService = queueThreads.get(queue);
         if (executorService != null) {
-
             executorService.shutdown();
         }
     }
 
     public void  start() {
-        logger.info("Starting primary processor...");
+        logger.info("Starting orchestrator...");
         try {
 
             primaryConnection = primaryConnectionFactory.createConnection();
@@ -88,7 +87,7 @@ public class Orchestrator {
                 numConsumersDestConsumer.setMessageListener(new ConsumerCountListener(queue));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error", e);
         }
     }
 }

@@ -30,7 +30,7 @@ public class ConsumedMessageListener implements MessageListener, ExceptionListen
             logger.info("msgId {}", msgId);
             final OperationFuture<Boolean> set = MessageSet.memcachedClient.set(msgId, 0, blank);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Consumed onMessage error", e);
         }
     }
 }

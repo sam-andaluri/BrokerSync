@@ -40,6 +40,6 @@ public class ConsumerCountListener implements MessageListener, ExceptionListener
 
     @Override
     public void onException(JMSException e) {
-
+        logger.error("Count OnMessage Error", e);
     }
 }
