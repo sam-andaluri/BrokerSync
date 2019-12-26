@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.jms.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
@@ -22,6 +23,7 @@ public class Orchestrator {
     private Session standbySession;
     private MessageSet mset = MessageSet.getInstance();
     private static HashMap<String, ExecutorService> queueThreads = new HashMap<>();
+    private static HashMap<String, ArrayList<Session>> queueSessions = new HashMap<>();
 
 
     public Orchestrator(Config configuration) {
@@ -40,10 +42,12 @@ public class Orchestrator {
         int numThreads = configuration.getThreadsPerQueue() * consumerCount;
         executorService = Executors.newFixedThreadPool(numThreads);
         queueThreads.put(queue, executorService);
+        ArrayList sessions = new ArrayList();
         for (int i = 0; i < numThreads; i++) {
             Session standbySession = null;
             try {
                 standbySession = standbyConnection.createSession(true, Session.SESSION_TRANSACTED);
+                sessions.add(standbySession);
             } catch (JMSException e) {
                 e.printStackTrace();
             }
@@ -51,9 +55,19 @@ public class Orchestrator {
             qr.setRetryTimeout(configuration.getRetryTimeout());
             executorService.execute(qr);
         }
+        queueSessions.put(queue, sessions);
     }
 
     public static void stopReaders(String queue) {
+        Iterator<Session> it = queueSessions.get(queue).iterator();
+        while (it.hasNext()) {
+            Session s = it.next();
+            try {
+                s.close();
+            } catch (JMSException e) {
+                logger.error("stop error ", e);
+            }
+        }
         ExecutorService executorService = queueThreads.get(queue);
         if (executorService != null) {
             executorService.shutdown();

@@ -8,13 +8,14 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
 import java.io.InputStream;
+//TODO Implement Fluentd logging to S3
 
 public class App 
 {
     private static Logger logger = LoggerFactory.getLogger(App.class);
     public static void main( String[] args )
     {
-        String configFileName = null;
+        String configFileName = "broker-sync.yaml";
         Orchestrator orchestrator;
 
         OptionParser parser = new OptionParser();
