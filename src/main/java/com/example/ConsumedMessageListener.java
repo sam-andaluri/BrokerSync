@@ -3,14 +3,14 @@ package com.example;
 import net.spy.memcached.internal.OperationFuture;
 import org.apache.activemq.command.ActiveMQMessage;
 import org.apache.activemq.command.ActiveMQTextMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.util.logging.Logger;
 
 import javax.jms.*;
 
 public class ConsumedMessageListener implements MessageListener, ExceptionListener {
 
-    private static Logger logger = LoggerFactory.getLogger(ConsumedMessageListener.class);
+    private static Logger logger = Logger.getLogger(ConsumedMessageListener.class.getName());
     private static String blank = " ";
 
     public ConsumedMessageListener() {
@@ -18,7 +18,7 @@ public class ConsumedMessageListener implements MessageListener, ExceptionListen
 
     @Override
     public void onException(JMSException e) {
-        logger.error(e.toString());
+        logger.severe(e.toString());
     }
 
     @Override
@@ -27,10 +27,10 @@ public class ConsumedMessageListener implements MessageListener, ExceptionListen
             ActiveMQMessage amqMessage = (ActiveMQMessage) message;
             ActiveMQTextMessage amqTextMessage = (ActiveMQTextMessage)amqMessage.getDataStructure();
             String msgId = amqTextMessage.getJMSCorrelationID();
-            logger.info("msgId {}", msgId);
+            logger.info("add msgId to cache : " + msgId);
             final OperationFuture<Boolean> set = MessageSet.memcachedClient.set(msgId, 0, blank);
         } catch (Exception e) {
-            logger.error("Consumed onMessage error", e);
+            logger.severe( "Consumed onMessage error : " + e.getMessage());
         }
     }
 }

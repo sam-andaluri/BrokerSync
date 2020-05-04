@@ -1,8 +1,7 @@
 package com.example;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.logging.Logger;
 
 import javax.jms.*;
 import java.util.ArrayList;
@@ -13,7 +12,7 @@ import java.util.concurrent.Executors;
 
 public class Orchestrator {
 
-    private static Logger logger = LoggerFactory.getLogger(Orchestrator.class);
+    private static Logger logger = Logger.getLogger(Orchestrator.class.getName());
     private static Config configuration;
     private ActiveMQConnectionFactory primaryConnectionFactory;
     private ActiveMQConnectionFactory standbyConnectionFactory;
@@ -28,6 +27,9 @@ public class Orchestrator {
 
     public Orchestrator(Config configuration) {
         this.configuration = configuration;
+
+        configuration.dump();
+
         primaryConnectionFactory = new ActiveMQConnectionFactory(configuration.getPrimaryBrokerURL());
         primaryConnectionFactory.setUserName(configuration.getPrimaryBrokerUsername());
         primaryConnectionFactory.setPassword(configuration.getPrimaryBrokerPassword());
@@ -40,6 +42,7 @@ public class Orchestrator {
     public static void startReaders(String queue, int consumerCount) {
         ExecutorService executorService;
         int numThreads = configuration.getThreadsPerQueue() * consumerCount;
+        logger.info("NumThreads " + numThreads + " ThreadsPerQueue " + configuration.getThreadsPerQueue() + " consumerCount " + consumerCount);
         executorService = Executors.newFixedThreadPool(numThreads);
         queueThreads.put(queue, executorService);
         ArrayList sessions = new ArrayList();
@@ -49,10 +52,11 @@ public class Orchestrator {
                 standbySession = standbyConnection.createSession(true, Session.SESSION_TRANSACTED);
                 sessions.add(standbySession);
             } catch (JMSException e) {
-                e.printStackTrace();
+                logger.severe( "Unable to connect to standby : " + e.getMessage());
             }
-            QueueReader qr = new QueueReader(queue + ".DR", standbySession);
+            QueueReader qr = new QueueReader(queue, standbySession);
             qr.setRetryTimeout(configuration.getRetryTimeout());
+            qr.setCwTag(configuration.getCWTag());
             executorService.execute(qr);
         }
         queueSessions.put(queue, sessions);
@@ -65,7 +69,7 @@ public class Orchestrator {
             try {
                 s.close();
             } catch (JMSException e) {
-                logger.error("stop error ", e);
+                logger.severe( "stop error : " + e.getMessage());
             }
         }
         ExecutorService executorService = queueThreads.get(queue);
@@ -75,7 +79,7 @@ public class Orchestrator {
     }
 
     public void  start() {
-        logger.info("Starting orchestrator...");
+        logger.info( "Starting orchestrator...");
         try {
 
             primaryConnection = primaryConnectionFactory.createConnection();
@@ -87,8 +91,12 @@ public class Orchestrator {
             primarySession = primaryConnection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             Iterator<String> iterator = configuration.getDrQueues().iterator();
 
+            logger.info( "Number of DR Queues : " + configuration.getDrQueues().size());
+
             while(iterator.hasNext()) {
+
                 String queue = iterator.next();
+                logger.info( "Starting DR queue listeners : " + queue);
 
                 String consumedTopic = "ActiveMQ.Advisory.MessageConsumed.Queue." + queue;
                 Destination consumedDest = primarySession.createTopic(consumedTopic);
@@ -101,7 +109,7 @@ public class Orchestrator {
                 numConsumersDestConsumer.setMessageListener(new ConsumerCountListener(queue));
             }
         } catch (Exception e) {
-            logger.error("Error", e);
+            logger.severe("Error : " + e.getMessage());
         }
     }
 }

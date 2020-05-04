@@ -1,8 +1,8 @@
 package com.example;
 
 import org.apache.activemq.command.ActiveMQMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.util.logging.Logger;
 
 import javax.jms.ExceptionListener;
 import javax.jms.JMSException;
@@ -10,7 +10,7 @@ import javax.jms.Message;
 import javax.jms.MessageListener;
 
 public class ConsumerCountListener implements MessageListener, ExceptionListener {
-    private static Logger logger = LoggerFactory.getLogger(ConsumerCountListener.class);
+    private static Logger logger = Logger.getLogger(ConsumerCountListener.class.getName());
     private String queueName;
 
     public ConsumerCountListener(String queueName) {
@@ -24,13 +24,13 @@ public class ConsumerCountListener implements MessageListener, ExceptionListener
 
         try {
             int consumerCount = amqMessage.getIntProperty("consumerCount");
-            logger.info("{} consumerCount = {}", queueName, consumerCount);
+            logger.info(queueName + " consumerCount = " + consumerCount);
             if (consumerCount > 0) {
                 Orchestrator.startReaders(queueName, consumerCount);
                 logger.info("Starting queue readers");
             } else {
                 Orchestrator.stopReaders(queueName);
-                logger.info("Stopping queue readers");
+                logger.info( "Stopping queue readers");
             }
         } catch (JMSException e) {
             e.printStackTrace();
@@ -40,6 +40,6 @@ public class ConsumerCountListener implements MessageListener, ExceptionListener
 
     @Override
     public void onException(JMSException e) {
-        logger.error("Count OnMessage Error", e);
+        logger.severe("Count OnMessage Error : " + e.getMessage());
     }
 }
