@@ -147,7 +147,7 @@ On the active region broker, setup a networkConnector between active and DR brok
 
 ```
  <networkConnectors>
-    <networkConnector name="to-pdx-broker" uri="masterslave:(ssl://b-a89ccbfc-2c24-45ec-a8c0-1839aa5a94f1-1.mq.us-west-2.amazonaws.com:61617,ssl://b-a89ccbfc-2c24-45ec-a8c0-1839aa5a94f1-2.mq.us-west-2.amazonaws.com:61617)" userName="aws">
+    <networkConnector name="to-pdx-broker" uri="masterslave:(ssl://yyyy-1.mq.us-west-2.amazonaws.com:61617,ssl://yyyy-2.mq.us-west-2.amazonaws.com:61617)" userName="aws">
       <staticallyIncludedDestinations>
         <queue physicalName="TEST.QUEUE.DR"/>
       </staticallyIncludedDestinations>
@@ -178,7 +178,7 @@ On the DR region broker, setup a networkConnector between DR and active brokers 
 
 ```
   <networkConnectors>
-    <networkConnector name="to-iad" uri="masterslave:(ssl://b-590425c9-1a73-43b0-ac7b-03bb58ecd8c1-1.mq.us-east-1.amazonaws.com:61617,ssl://b-590425c9-1a73-43b0-ac7b-03bb58ecd8c1-2.mq.us-east-1.amazonaws.com:61617)" userName="aws">
+    <networkConnector name="to-iad" uri="masterslave:(ssl://xxxx-1.mq.us-east-1.amazonaws.com:61617,ssl://xxxx-2.mq.us-east-1.amazonaws.com:61617)" userName="aws">
       <excludedDestinations>
         <queue physicalName="TEST.QUEUE"/>
       </excludedDestinations>
