@@ -10,7 +10,7 @@
 The solution detailed below solves both of these problems with specific limitations. Problem was broken down into two distinct sub problems/tasks.
 
 * Provide customer a way to copy messages to the DR region.
-* Provide customer a sample application that keeps messages in sync** with specific RPO expectations.
+* Provide customer a sample application that keeps messages in sync with specific RPO expectations.
 
 ### Copy messages between primary and DR brokers
 
@@ -46,11 +46,11 @@ The following step by step procedure describes how the customer experience would
 ### DR Region setup
 
 1. Setup AmazonMQ A/S Durability Optimized or A/A Throughput Optimized brokers.
-2. Setup an EC2 instance in DR Region with at least 2 CPUs and 8GB RAM.
+2. Setup a compute instance (EC2/ECS) in DR Region with at least 2 CPUs and 8GB RAM.
 3. Setup an ElasticCache/memcached in DR Region with at least cache.r5.large.
 4. In the DR region, producer/consumer applications are configured with failover URL of DR Broker.
 
-### DR Sceanrios 
+### DR Scenarios 
 
 #### Active Region is Primary. Both Active and DR region are operational.
 
