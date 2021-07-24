@@ -36,7 +36,7 @@
     <dependency>
       <groupId>com.amazonaws</groupId>
       <artifactId>aws-java-sdk-cloudwatch</artifactId>
-      <version>1.12.10</version>
+      <version>1.12.16</version>
     </dependency>
   </dependencies>
 
